@@ -50,7 +50,6 @@ from jax._src.lax import lax as lax_internal
 from jax._src.mesh import thread_resources
 from jax._src.tree_util import KeyEntry, KeyPath
 from jax.ad_checkpoint import Offloadable, Recompute, Saveable
-from jax.extend.core import Primitive
 from jax.experimental import mesh_utils, multihost_utils
 from jax.extend.core import Primitive
 from jax.sharding import PartitionSpec
@@ -155,8 +154,7 @@ register_validator(
 
 
 class RematPolicy(Protocol):
-    def __call__(self, prim: Primitive, *args: Any, **params: Any) -> Union[RematType, bool]:
-        ...
+    def __call__(self, prim: Primitive, *args: Any, **params: Any) -> Union[RematType, bool]: ...
 
 
 def save_and_offload_only_these_names_regex(
