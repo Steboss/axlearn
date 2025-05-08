@@ -82,6 +82,7 @@ from typing import Any, Callable, Generic, Optional, Sequence, TypeVar, Union
 # to apply validation on field names and values.
 import attr
 import numpy as np
+from jax.sharding import PartitionSpec
 
 
 def is_named_tuple(x: Any):
@@ -256,6 +257,11 @@ register_validator(
 register_validator(
     match_fn=lambda v: not isinstance(v, type) and hasattr(v, "from_pretrained"),
     validate_fn=lambda v: validate_config_field_value(v.to_dict()),
+)
+# Validate PartitionSpec for JAX > 0.5.3
+register_validator(
+    match_fn=lambda v: isinstance(v, PartitionSpec),
+    validate_fn=lambda v: validate_config_field_value(tuple(v)),
 )
 
 
