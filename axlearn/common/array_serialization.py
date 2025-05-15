@@ -29,7 +29,7 @@ from typing import Any, Callable, Optional, Sequence, Union
 import jax
 import numpy as np
 from absl import logging
-from jax._src import array, config, layout, typing
+from jax._src import array, layout, typing
 from jax.experimental.array_serialization import serialization
 
 from axlearn.common.utils import Tensor
@@ -150,7 +150,7 @@ def _transfer_to_host(data: Tensor) -> Tensor:
     """
     device = list(data.devices())[0]
     has_pinned_host = any(m.kind == "pinned_host" for m in device.addressable_memories())
-    if config.enable_memories.value and has_pinned_host:
+    if has_pinned_host:
         # If available, transfer to pinned host memory.
         data = jax.device_put(
             data, jax.sharding.SingleDeviceSharding(device, memory_kind="pinned_host")

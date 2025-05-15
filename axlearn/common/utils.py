@@ -136,7 +136,11 @@ class TensorSpec:
     @property
     def sharding(self) -> jax.sharding.Sharding:
         mesh = thread_resources.env.physical_mesh
-        return jax.sharding.NamedSharding(mesh, self.mesh_axes, memory_kind=self.memory_kind)
+        return jax.sharding.NamedSharding(
+            mesh,
+            PartitionSpec() if self.mesh_axes is None else self.mesh_axes,
+            memory_kind=self.memory_kind,
+        )
 
 
 NestedTensorSpec = Optional[Union[TensorSpec, dict[str, Any]]]
@@ -1873,7 +1877,7 @@ def pytree_children(node: Any) -> Sequence[tuple[KeyEntry, Any]]:
     if isinstance(node, tuple) and hasattr(node, "_fields") and flat[1] == type(node):
         # Handle namedtuple as a special case, based on heuristic.
         return [(jax.tree_util.GetAttrKey(s), getattr(node, s)) for s in node._fields]
-    
+
     key_children, _ = jax.tree_util.default_registry.flatten_one_level_with_keys(node)
     if key_children:
         return key_children
