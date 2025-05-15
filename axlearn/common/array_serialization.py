@@ -247,7 +247,7 @@ async def _async_serialize(
         and arr_inp.is_fully_addressable
     )
     # pylint: disable-next=protected-access
-    if not serialization._spec_has_metadata(tensorstore_spec):
+    if not serialization.ts_impl._spec_has_metadata(tensorstore_spec):
         # pylint: disable-next=protected-access
         tensorstore_spec["metadata"] = serialization._get_metadata(arr_inp)
     if "dtype" not in tensorstore_spec:
