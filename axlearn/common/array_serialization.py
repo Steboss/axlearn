@@ -200,7 +200,8 @@ def _fix_metadata(tspec: dict[str, Any], shard_infos: list[_ShardInfo]):
 
 
 class TensorstoreSpecModifier:
-    def __call__(self, spec: dict[str, Any], *, shard_infos: list[_ShardInfo]): ...
+    def __call__(self, spec: dict[str, Any], *, shard_infos: list[_ShardInfo]):
+        ...
 
 
 async def _async_serialize(
@@ -268,14 +269,14 @@ async def _async_serialize(
     # does no I/O operation and returns the tensorstore object. For every process other than `0`,
     # we open with `assume_metadata=True`.
     if jax.process_index() == 0:
-        await serialization.ts.open(
-            serialization.ts.Spec(tensorstore_spec),
+        await serialization.ts_impl.ts.open(
+            serialization.ts_impl.ts.Spec(tensorstore_spec),
             create=True,
             open=True,
             context=serialization.TS_CONTEXT,
         )
-    t = await serialization.ts.open(
-        serialization.ts.Spec(tensorstore_spec),
+    t = await serialization.ts_impl.ts.open(
+        serialization.ts_impl.ts.Spec(tensorstore_spec),
         open=True,
         assume_metadata=True,
         context=serialization.TS_CONTEXT,
