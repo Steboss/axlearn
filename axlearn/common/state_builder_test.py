@@ -673,7 +673,9 @@ class TestConv2DStateBuilders(TestCase):
         **extra_converter_config_kwargs,
     ):
         source_state = _mock_state(source_cfg, seed=0)
-        initial_trainer_state_tree_structure = jax.tree_util.structure(source_state.trainer_state)
+        initial_trainer_state_tree_structure = jax.tree_util.tree_structure(
+            source_state.trainer_state
+        )
 
         builder = (
             builder_cls.default_config()
@@ -687,7 +689,7 @@ class TestConv2DStateBuilders(TestCase):
         source_model = source_state.trainer_state.model
 
         converted_state = builder(deepcopy(source_state))
-        assert initial_trainer_state_tree_structure == jax.tree_util.structure(
+        assert initial_trainer_state_tree_structure == jax.tree_util.tree_structure(
             converted_state.trainer_state
         )
         converted_model = converted_state.trainer_state.model

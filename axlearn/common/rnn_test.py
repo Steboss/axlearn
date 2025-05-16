@@ -187,7 +187,7 @@ class StackedRNNTest(TestCase):
 
         # Stack the tree leaves.
         tree_leaves = [jax.tree_util.tree_flatten(t)[0] for t in final_states_list]
-        tree_def = jax.tree_util.structure(final_states_list[0])
+        tree_def = jax.tree_util.tree_structure(final_states_list[0])
         final_states = jax.tree_util.tree_unflatten(
             tree_def, [jnp.stack(leaf) for leaf in zip(*tree_leaves)]
         )

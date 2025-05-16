@@ -587,7 +587,9 @@ class TensorStoreStateStorage(StateStorage):
             else:
                 raise RuntimeError(f"Unknown index entry '{value}'")
 
-        restored_state = jax.tree_util.tree_unflatten(jax.tree_util.structure(state), state_leaves)
+        restored_state = jax.tree_util.tree_unflatten(
+            jax.tree_util.tree_structure(state), state_leaves
+        )
         if sync:
             multihost_utils.sync_global_devices(ckpt_dir)
         return restored_state

@@ -706,9 +706,9 @@ def complete_partition_spec_tree(
         logging.info("[complete_partition_spec_tree] ValueError: %s", err)
         logging.info(
             "[complete_partition_spec_tree] partition_spec_tree_with_proxy=%s",
-            jax.tree_util.structure(partition_spec_tree_with_proxy),
+            jax.tree_util.tree_structure(partition_spec_tree_with_proxy),
         )
-        logging.info("[complete_partition_spec_tree] dummy=%s", jax.tree_util.structure(dummy))
+        logging.info("[complete_partition_spec_tree] dummy=%s", jax.tree_util.tree_structure(dummy))
         for path, value in flatten_items(partition_spec_tree_with_proxy):
             logging.info(
                 "[complete_partition_spec_tree] partition_spec_tree_with_proxy leaf: %s=%s",
@@ -848,7 +848,7 @@ def host_to_global_device_array(
 
     mesh = thread_resources.env.physical_mesh
     partition_specs = complete_partition_spec_tree(
-        jax.tree_util.structure(host_arrays),
+        jax.tree_util.tree_structure(host_arrays),
         data_partition_type_to_spec(partition),
     )
     process_count = jax.process_count()
@@ -1973,7 +1973,7 @@ def validate_contains_paths(x: Nested[Tensor], paths: Sequence[str]):
         except KeyError as e:
             raise ValueError(
                 f"Input is expected to contain '{path}'; "
-                f"instead, it contains: '{jax.tree_util.structure(x)}'."
+                f"instead, it contains: '{jax.tree_util.tree_structure(x)}'."
             ) from e
 
 

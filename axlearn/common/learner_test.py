@@ -174,8 +174,8 @@ class LearnerTest(TestCase):
         self.assertGreater(forward_outputs.aux["discriminator_loss"], 0.0)
         # The structure of updated params and Adam mu states are same.
         self.assertNestedEqual(
-            jax.tree_util.structure(updated_model_params),
-            jax.tree_util.structure(learner_state["optimizer"][1].mu),
+            jax.tree_util.tree_structure(updated_model_params),
+            jax.tree_util.tree_structure(learner_state["optimizer"][1].mu),
         )
 
     @parameterized.product(ema_decay=(None, 0.9), method=("update", "forward_and_backward"))
@@ -992,14 +992,14 @@ class CompositeLearnerTest(TestCase):
         # The structure of updated params and optimizer states are same.
         opt_state_leaf_fn = lambda x: isinstance(x, (Tensor, optax.MaskedNode))
         self.assertNestedEqual(
-            jax.tree_util.structure(updated_model_params),
-            jax.tree_util.structure(
+            jax.tree_util.tree_structure(updated_model_params),
+            jax.tree_util.tree_structure(
                 learner_state["encoder"]["optimizer"][0].trace, is_leaf=opt_state_leaf_fn
             ),
         )
         self.assertNestedEqual(
-            jax.tree_util.structure(updated_model_params),
-            jax.tree_util.structure(
+            jax.tree_util.tree_structure(updated_model_params),
+            jax.tree_util.tree_structure(
                 learner_state["decoder"]["optimizer"][1].mu, is_leaf=opt_state_leaf_fn
             ),
         )
