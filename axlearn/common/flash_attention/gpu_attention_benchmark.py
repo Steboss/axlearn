@@ -190,7 +190,7 @@ def measure(f: BenchFn, *args: Tensor) -> tuple[Tensor, float]:
     def run(*args):
         start_event, args = _event_record(args, copy_before=True)
         end_event, outs = _event_record(f(*args), copy_before=False)
-        if jax.tree.structure(outs).num_leaves == 0:
+        if jax.tree_util.structure(outs).num_leaves == 0:
             raise ValueError("Can only measure functions with at least one output")
         return outs, _event_elapsed(start_event, end_event)
 

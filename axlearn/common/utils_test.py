@@ -398,7 +398,7 @@ class TreeUtilsTest(TestCase):
         # Note that 'None' is considered part of the tree structure, not tree leaves.
         self.assertEqual(
             "PyTreeDef(CustomNode(VDict[('a', 'b', 'c')], [*, *, None]))",
-            str(jax.tree_util.tree_structure(tree)),
+            str(jax.tree_util.structure(tree)),
         )
         self.assertLen(jax.tree_util.tree_leaves(tree), 2)
 
@@ -699,9 +699,7 @@ class TreeUtilsTest(TestCase):
         partition_by_x = PartitionSpec("x")
         partial_partition_spec = dict(replicated=None, sharded=partition_by_x)
         self.assertEqual(
-            complete_partition_spec_tree(
-                jax.tree_util.tree_structure(data), partial_partition_spec
-            ),
+            complete_partition_spec_tree(jax.tree_util.structure(data), partial_partition_spec),
             dict(
                 replicated=dict(a=None, b=None), sharded=VDict(c=partition_by_x, d=partition_by_x)
             ),
@@ -713,7 +711,7 @@ class TreeUtilsTest(TestCase):
         )
         self.assertEqual(
             complete_partition_spec_tree(
-                jax.tree_util.tree_structure(data), dict(replicated=None, sharded=param_spec)
+                jax.tree_util.structure(data), dict(replicated=None, sharded=param_spec)
             ),
             dict(replicated=dict(a=None, b=None), sharded=VDict(c=param_spec, d=param_spec)),
         )
