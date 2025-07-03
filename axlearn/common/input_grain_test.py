@@ -437,8 +437,7 @@ class UtilsTest(TestCase):
 class _PerProcessFn(Protocol):
     """Processes per-host data."""
 
-    def __call__(self, ds: Dataset, *, dispatch_config: DispatchConfig) -> Dataset:
-        ...
+    def __call__(self, ds: Dataset, *, dispatch_config: DispatchConfig) -> Dataset: ...
 
 
 class InputTest(parameterized.TestCase):
@@ -578,16 +577,35 @@ class InputTest(parameterized.TestCase):
         batch = next(grain_input.batches(iter(grain_input)))
         self.assertEqual(batch.shape[0], grain_input.input_dispatcher.feed_logical_batch_size)
 
-        # Try with the incorrect batching.
-        cfg = self._input_config(
-            range_dataset(start=0, stop=10, seed=123).shuffle().repeat(num_epochs=1),
-            per_process=lambda ds, **_: ds.batch(4),
+    @parameterized.parameters(
+        # Should produce a per-feed batch of 2, taking every `num_shards` example.
+        dict(num_shards=2, shard_index=0, expected=[0, 2]),
+        dict(num_shards=2, shard_index=1, expected=[1, 3]),
+    )
+    def test_dispatch_cpu(self, num_shards: int, shard_index: int, expected: list):
+        global_batch_size = num_shards * 2
+        dispatcher = InputDispatcher.default_config().set(
+            global_logical_batch_size=global_batch_size,
+            num_physical_feeds=num_shards,
+            physical_feed_index=shard_index,
         )
-        cfg.input_dispatcher = dispatcher
-        grain_input: Input = cfg.instantiate(parent=None)
 
-        with self.assertRaisesRegex(ValueError, "per-feed batch"):
-            next(grain_input.batches(iter(grain_input)))
+        # Dispatch requires examples to be dicts.
+        ds = range_dataset(start=0, stop=10, seed=123).map(lambda x: {"input_ids": x})
+        # Each process produces feed_logical_batch_size.
+        cfg = self._input_config(
+            ds.repeat(num_epochs=None),
+            per_process=partial(per_feed_batch, global_batch_size=global_batch_size),
+        )
+        cfg.partition_spec = PartitionSpec("x")
+        cfg.input_dispatcher = dispatcher
+
+        grain_input: Input = cfg.instantiate(parent=None)
+        for batch in grain_input:
+            # Each batch produces data corresponding to the current shard.
+            self.assertEqual(list(batch.keys()), ["input_ids"])
+            self.assertEqual(batch["input_ids"].tolist(), expected)
+            break
 
     @parameterized.parameters(
         # Should produce a per-feed batch of 2, taking every `num_shards` example.

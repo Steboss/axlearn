@@ -69,14 +69,12 @@ class RaggedTensor(list):
 
 @runtime_checkable
 class _CallableTransform(Protocol):
-    def __call__(self, example: Any) -> Any:
-        ...
+    def __call__(self, example: Any) -> Any: ...
 
 
 @runtime_checkable
 class _RandomCallableTransform(Protocol):
-    def __call__(self, example: Any, rng: np.random.Generator) -> Any:
-        ...
+    def __call__(self, example: Any, rng: np.random.Generator) -> Any: ...
 
 
 # Grain supports a set of predefined transformations (e.g. grain.MapTransform), as well as callables
@@ -125,8 +123,7 @@ class DispatchConfig:
 class BuildDatasetFn(Protocol):
     """A function to create a grain data source."""
 
-    def __call__(self, dispatch_config: DispatchConfig) -> Dataset:
-        ...
+    def __call__(self, dispatch_config: DispatchConfig) -> Dataset: ...
 
 
 def _copy_tree(x: _T) -> _T:
@@ -156,6 +153,7 @@ def _ragged_batch_size(tensor: Union[Tensor, RaggedTensor]) -> int:  # type: ign
 def array_record_dataset(
     paths: Union[PathLikeOrFileInstruction, Sequence[PathLikeOrFileInstruction]],
     *,
+    data_source_cls: type[grain.ArrayRecordDataSource] = grain.ArrayRecordDataSource,
     seed: Optional[int],
 ) -> Dataset:
     """Builds an ArrayRecord dataset.
@@ -167,12 +165,13 @@ def array_record_dataset(
         paths: One or more array record paths, each of which can be a pathlike (e.g. string)
             or tfds `FileInstruction`. When reading subsets or a large number of files prefer to
             pass `FileInstruction`s.
+        data_source_cls: A class reference to a subclass of ArrayRecordDataSource.
         seed: Seed for any downstream transformations (e.g. `shuffle` or `random_map`).
 
     Returns:
         An ArrayRecord dataset.
     """
-    source = grain.ArrayRecordDataSource(paths)
+    source = data_source_cls(paths)
     ds = grain.MapDataset.source(source)
     if seed is not None:
         ds = ds.seed(seed)
