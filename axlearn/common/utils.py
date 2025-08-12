@@ -28,17 +28,7 @@ import types
 from collections.abc import Mapping, Sequence
 from enum import Enum
 from functools import cache
-from typing import (
-    Any,
-    Callable,
-    Literal,
-    NamedTuple,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-    runtime_checkable,
-)
+from typing import Any, Callable, NamedTuple, Optional, Protocol, TypeVar, Union, runtime_checkable
 
 import attr
 import jax
@@ -118,7 +108,7 @@ class HybridMeshShape:
 # "pinned_host" = Page locked memory on CPU, which can be address directly by accelerators by
 # direct memory access (DMA). For TPU, "pinned_host" memory layout follows TPU device tile
 # layout and usually cannot be zero-copy converted to a CPU-tensor.
-MemoryKind = Literal["device", "pinned_host"]
+MemoryKind = [jax.memory.Space.Device, jax.memory.Space.Host]
 
 
 @dataclasses.dataclass
