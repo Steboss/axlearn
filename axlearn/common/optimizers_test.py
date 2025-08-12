@@ -428,7 +428,7 @@ class OptimizerTest(TestCase):
 
         if offload:
             self.assertIn(
-                "TransferToMemoryKind(memory_kind='pinned_host')",
+                "memory_kind=host",
                 str(jax.make_jaxpr(jit_fn)(params, state)),
             )
         loss, new_loss = jit_fn(params, state)

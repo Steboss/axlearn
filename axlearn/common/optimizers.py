@@ -37,7 +37,7 @@ import optax
 import typing_extensions
 from absl import logging
 from jax import numpy as jnp
-from jax._src.sharding_impls import TransferToMemoryKind
+from jax.memory import Space
 from optax._src import numerics
 
 from axlearn.common import schedule, struct
@@ -2065,8 +2065,8 @@ def offload_optimizer(
     optimizer: ConfigOr[PartitionedGradientTransformation],
     *,
     pattern: Union[str, re.Pattern] = ".*",
-    offload_src: MemoryKind = "device",
-    offload_dst: MemoryKind = "pinned_host",
+    offload_src: MemoryKind = Space.Device,
+    offload_dst: MemoryKind = Space.Host,
 ) -> PartitionedGradientTransformation:
     """Offload the state of the wrapped optimizer that matches `pattern` to `offload_dst`.
 
@@ -2138,9 +2138,7 @@ def offload_optimizer(
         # released, so we have less memory pressure at that point in time.
         return jax.tree.map(
             lambda path, tensor: (
-                jax.device_put(tensor, TransferToMemoryKind(dst))
-                if re.fullmatch(pattern, path)
-                else tensor
+                jax.device_put(tensor, dst) if re.fullmatch(pattern, path) else tensor
             ),
             tree_paths(state),
             state,
